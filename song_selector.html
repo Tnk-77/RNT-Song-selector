@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contest Song Selection</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons@latest/tabler-icons.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --color-background-primary: #ffffff;
+      --color-background-secondary: #f5f5f5;
+      --color-background-info: #e6f1fb;
+      --color-background-success: #eaf3de;
+      --color-background-warning: #faeeda;
+      --color-text-primary: #1a1a1a;
+      --color-text-secondary: #666666;
+      --color-text-info: #185fa5;
+      --color-text-success: #3b6d11;
+      --color-text-warning: #854f0b;
+      --color-text-danger: #a32d2d;
+      --color-border-tertiary: rgba(0, 0, 0, 0.1);
+      --color-border-secondary: rgba(0, 0, 0, 0.2);
+      --color-border-success: #c0dd97;
+      --color-border-warning: #fac775;
+      --border-radius-md: 8px;
+      --border-radius-lg: 12px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --color-background-primary: #1a1a1a;
+        --color-background-secondary: #2a2a2a;
+        --color-background-info: #0c447c;
+        --color-background-success: #27500a;
+        --color-background-warning: #633806;
+        --color-text-primary: #ffffff;
+        --color-text-secondary: #cccccc;
+        --color-text-info: #85b7eb;
+        --color-text-success: #97c459;
+        --color-text-warning: #ef9f27;
+        --color-text-danger: #f09595;
+        --color-border-tertiary: rgba(255, 255, 255, 0.1);
+        --color-border-secondary: rgba(255, 255, 255, 0.2);
+        --color-border-success: #97c459;
+        --color-border-warning: #ef9f27;
+      }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+      background: var(--color-background-secondary);
+      color: var(--color-text-primary);
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h2 {
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 24px;
+      color: var(--color-text-primary);
+    }
+
+    h3 {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 12px;
+      color: var(--color-text-primary);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .column {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .song-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 500px;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+
+    .song-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background: var(--color-background-secondary);
+      border: 0.5px solid var(--color-border-tertiary);
+      border-radius: var(--border-radius-md);
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.15s;
+    }
+
+    .song-item:hover:not(:disabled) {
+      border-color: var(--color-border-secondary);
+      background: var(--color-background-primary);
+    }
+
+    .song-item.selected {
+      background: var(--color-background-info);
+      border-color: var(--color-border-secondary);
+      color: var(--color-text-info);
+    }
+
+    .song-item:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .song-title {
+      flex: 1;
+      text-align: left;
+    }
+
+    .song-duration {
+      font-size: 12px;
+      margin-left: 8px;
+      font-weight: 500;
+    }
+
+    .selection-item {
+      display: flex;
+      align-items: center;
+      padding: 10px 12px;
+      background: var(--color-background-primary);
+      border: 0.5px solid var(--color-border-secondary);
+      border-radius: var(--border-radius-md);
+      gap: 8px;
+    }
+
+    .selection-position {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--color-background-info);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-text-info);
+      flex-shrink: 0;
+    }
+
+    .selection-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .selection-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-text-primary);
+    }
+
+    .selection-meta {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+    }
+
+    .selection-controls {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .control-btn {
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      background: var(--color-background-secondary);
+      border: 0.5px solid var(--color-border-tertiary);
+      border-radius: var(--border-radius-md);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      color: var(--color-text-primary);
+    }
+
+    .control-btn:hover:not(:disabled) {
+      border-color: var(--color-border-secondary);
+    }
+
+    .control-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .control-btn.remove {
+      color: var(--color-text-danger);
+    }
+
+    .duration-indicator {
+      padding: 12px;
+      border-radius: var(--border-radius-md);
+      font-size: 13px;
+      margin-bottom: 16px;
+      border: 0.5px solid;
+    }
+
+    .duration-indicator.valid {
+      background: var(--color-background-success);
+      border-color: var(--color-border-success);
+      color: var(--color-text-success);
+    }
+
+    .duration-indicator.invalid {
+      background: var(--color-background-warning);
+      border-color: var(--color-border-warning);
+      color: var(--color-text-warning);
+    }
+
+    .export-btn {
+      width: 100%;
+      padding: 10px;
+      border-radius: var(--border-radius-md);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 0.5px solid;
+      transition: all 0.15s;
+    }
+
+    .export-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .export-btn.ready {
+      background: var(--color-background-primary);
+      border-color: var(--color-border-success);
+      color: var(--color-text-success);
+    }
+
+    .export-btn.ready:hover {
+      border-color: var(--color-text-success);
+    }
+
+    .export-btn:disabled {
+      background: var(--color-background-secondary);
+      border-color: var(--color-border-tertiary);
+      color: var(--color-text-secondary);
+    }
+
+    .selections-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .icon {
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Contest song selection</h2>
+    
+    <div class="grid">
+      <div class="column">
+        <h3>Available songs (<span id="songCount">31</span>)</h3>
+        <div class="song-list" id="songList"></div>
+      </div>
+
+      <div class="column">
+        <h3>Your selections (<span id="selectionCount">0</span>/4)</h3>
+        <div class="selections-list" id="selectionsList"></div>
+        <div class="duration-indicator invalid" id="durationIndicator">
+          Total: 0:00 / min. 15:00
+        </div>
+        <button class="export-btn" id="exportBtn" disabled>
+          Select 4 songs with 15+ min duration
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const songs = [
+      { id: 1, title: 'SPACE ODDITY', duration: '00:05:00' },
+      { id: 2, title: 'HONKY TONK WOMAN', duration: '00:03:00' },
+      { id: 3, title: 'AMORE DISPERATO', duration: '00:02:30' },
+      { id: 4, title: 'CRAZY LITTLE THING CALLED LOVE', duration: '00:03:00' },
+      { id: 5, title: 'SIMPATHY FOR THE DEVIL', duration: '00:04:50' },
+      { id: 6, title: 'PERSONAL JESUS', duration: '00:05:00' },
+      { id: 7, title: 'BOCCA DI ROSA', duration: '00:03:45' },
+      { id: 8, title: 'ZIGGY STARDUST', duration: '00:03:00' },
+      { id: 9, title: 'HEROES', duration: '00:04:00' },
+      { id: 10, title: 'THE MAN WHO SOLD THE WORLD', duration: '00:04:30' },
+      { id: 11, title: 'STARMAN', duration: '00:04:00' },
+      { id: 12, title: 'YOU NEVER CAN TELL', duration: '00:03:00' },
+      { id: 13, title: 'I WILL SURVIVE', duration: '00:04:00' },
+      { id: 14, title: 'PENSIERO STUPENDO', duration: '00:04:30' },
+      { id: 15, title: 'LA COLLINA DEI CILIEGI', duration: '00:05:00' },
+      { id: 16, title: 'PSYCHO KILLER', duration: '00:04:30' },
+      { id: 17, title: 'INSIEME A TE STO BENE', duration: '00:03:30' },
+      { id: 18, title: 'HEY HEY MY MY', duration: '00:05:00' },
+      { id: 19, title: 'RAGAZZO DI STRADA', duration: '00:03:00' },
+      { id: 20, title: 'WHILE MY GUITAR', duration: '00:05:00' },
+      { id: 21, title: 'LONELY BOY', duration: '00:03:30' },
+      { id: 22, title: 'TAKE ME OUT', duration: '00:04:20' },
+      { id: 23, title: 'BRITNEY', duration: '00:03:00' },
+      { id: 24, title: 'YOU GOT IT', duration: '00:03:20' },
+      { id: 25, title: 'WICKED GAME', duration: '00:03:30' },
+      { id: 26, title: 'LOVE ME 2/ROADHOUSE/BREAK', duration: '00:07:00' },
+      { id: 27, title: 'PROUD MARY', duration: '00:02:30' },
+      { id: 28, title: 'CROCODILE ROCK', duration: '00:04:30' },
+      { id: 29, title: 'EPPUR MI SON SCORDATO', duration: '00:03:00' },
+      { id: 30, title: 'AMANDOTI', duration: '00:04:00' },
+      { id: 31, title: 'A MANO A MANO', duration: '00:03:00' },
+    ];
+
+    let selections = [];
+
+    const parseDuration = (durationStr) => {
+      const [h, m, s] = durationStr.split(':').map(Number);
+      return h * 3600 + m * 60 + s;
+    };
+
+    const formatDuration = (seconds) => {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${mins}:${String(secs).padStart(2, '0')}`;
+    };
+
+    const addSelection = (songId) => {
+      if (selections.length >= 4) return;
+      if (selections.find(s => s.id === songId)) return;
+
+      const song = songs.find(s => s.id === songId);
+      selections.push({
+        ...song,
+        durationSeconds: parseDuration(song.duration),
+        position: selections.length + 1
+      });
+
+      render();
+    };
+
+    const removeSelection = (songId) => {
+      selections = selections.filter(s => s.id !== songId);
+      selections.forEach((s, i) => s.position = i + 1);
+      render();
+    };
+
+    const moveSelection = (songId, direction) => {
+      const idx = selections.findIndex(s => s.id === songId);
+      if (direction === 'up' && idx > 0) {
+        [selections[idx], selections[idx - 1]] = [selections[idx - 1], selections[idx]];
+      } else if (direction === 'down' && idx < selections.length - 1) {
+        [selections[idx], selections[idx + 1]] = [selections[idx + 1], selections[idx]];
+      }
+      selections.forEach((s, i) => s.position = i + 1);
+      render();
+    };
+
+    const getTotalSeconds = () => {
+      return selections.reduce((sum, s) => sum + s.durationSeconds, 0);
+    };
+
+    const getTotalMinutes = () => {
+      return getTotalSeconds() / 60;
+    };
+
+    const isValidDuration = () => {
+      return getTotalSeconds() >= 900;
+    };
+
+    const isComplete = () => {
+      return selections.length === 4 && isValidDuration();
+    };
+
+    const exportText = () => {
+      const points = [4, 3, 2, 1];
+      let text = 'CONTEST SONG SELECTION\n\n';
+      selections.forEach((s, i) => {
+        text += `${i + 1}. ${s.title} (${s.duration}) - ${points[i]} pts\n`;
+      });
+      const totalMin = Math.floor(getTotalMinutes());
+      const totalSec = Math.round((getTotalMinutes() % 1) * 60);
+      text += `\nTotal duration: ${totalMin}:${String(totalSec).padStart(2, '0')} (${selections.length} songs)`;
+      return text;
+    };
+
+    const copyToClipboard = () => {
+      navigator.clipboard.writeText(exportText()).then(() => {
+        const btn = document.getElementById('exportBtn');
+        const originalText = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => {
+          btn.textContent = originalText;
+        }, 2000);
+      });
+    };
+
+    const render = () => {
+      // Render song list
+      const songList = document.getElementById('songList');
+      songList.innerHTML = '';
+      songs.forEach(song => {
+        const isSelected = selections.find(s => s.id === song.id);
+        const btn = document.createElement('button');
+        btn.className = `song-item ${isSelected ? 'selected' : ''}`;
+        btn.disabled = selections.length >= 4 && !isSelected;
+        btn.innerHTML = `
+          <span class="song-title">${song.title}</span>
+          <span class="song-duration">${song.duration}</span>
+        `;
+        btn.onclick = () => !isSelected && addSelection(song.id);
+        songList.appendChild(btn);
+      });
+
+      // Render selections
+      const selectionsList = document.getElementById('selectionsList');
+      selectionsList.innerHTML = '';
+      selections.forEach((song, idx) => {
+        const div = document.createElement('div');
+        div.className = 'selection-item';
+        const points = [4, 3, 2, 1];
+        div.innerHTML = `
+          <div class="selection-position">${idx + 1}</div>
+          <div class="selection-info">
+            <div class="selection-title">${song.title}</div>
+            <div class="selection-meta">${song.duration} • ${points[idx]} pts</div>
+          </div>
+          <div class="selection-controls">
+            <button class="control-btn" ${idx === 0 ? 'disabled' : ''}>
+              <i class="icon ti ti-arrow-up"></i>
+            </button>
+            <button class="control-btn" ${idx === selections.length - 1 ? 'disabled' : ''}>
+              <i class="icon ti ti-arrow-down"></i>
+            </button>
+            <button class="control-btn remove">
+              <i class="icon ti ti-x"></i>
+            </button>
+          </div>
+        `;
+
+        const upBtn = div.querySelector('.control-btn:nth-child(1)');
+        const downBtn = div.querySelector('.control-btn:nth-child(2)');
+        const removeBtn = div.querySelector('.remove');
+
+        upBtn.onclick = () => moveSelection(song.id, 'up');
+        downBtn.onclick = () => moveSelection(song.id, 'down');
+        removeBtn.onclick = () => removeSelection(song.id);
+
+        selectionsList.appendChild(div);
+      });
+
+      // Update counters
+      document.getElementById('selectionCount').textContent = selections.length;
+
+      // Update duration indicator
+      const totalMin = getTotalMinutes();
+      const totalSec = Math.round((totalMin % 1) * 60);
+      const indicator = document.getElementById('durationIndicator');
+      const durationText = `Total: ${Math.floor(totalMin)}:${String(totalSec).padStart(2, '0')} / min. 15:00`;
+      
+      if (isValidDuration()) {
+        indicator.className = 'duration-indicator valid';
+        indicator.textContent = durationText + ' ✓';
+      } else {
+        indicator.className = 'duration-indicator invalid';
+        indicator.textContent = durationText;
+      }
+
+      // Update export button
+      const exportBtn = document.getElementById('exportBtn');
+      if (isComplete()) {
+        exportBtn.className = 'export-btn ready';
+        exportBtn.disabled = false;
+        exportBtn.textContent = 'Copy result to clipboard';
+        exportBtn.onclick = copyToClipboard;
+      } else {
+        exportBtn.className = 'export-btn';
+        exportBtn.disabled = true;
+        exportBtn.textContent = 'Select 4 songs with 15+ min duration';
+      }
+    };
+
+    render();
+  </script>
+</body>
+</html>
