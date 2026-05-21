@@ -93,15 +93,9 @@
 
     .auth-fields {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
       gap: 12px;
       margin-bottom: 16px;
-    }
-
-    @media (max-width: 600px) {
-      .auth-fields {
-        grid-template-columns: 1fr;
-      }
     }
 
     .form-group {
@@ -395,10 +389,6 @@
           <label for="voterEmail">Your email *</label>
           <input type="email" id="voterEmail" placeholder="your.email@example.com" required>
         </div>
-        <div class="form-group">
-          <label for="recipientEmail">Recipient email *</label>
-          <input type="email" id="recipientEmail" placeholder="marco@example.com" required>
-        </div>
       </div>
       <div id="authStatus"></div>
     </div>
@@ -463,10 +453,9 @@
     let selections = [];
     let authenticated = false;
     let voterEmail = '';
-    let recipientEmail = '';
+    let recipientEmail = 'rnt.band.2020@gmail.com';
 
     const voterEmailInput = document.getElementById('voterEmail');
-    const recipientEmailInput = document.getElementById('recipientEmail');
     const authStatusDiv = document.getElementById('authStatus');
 
     const parseDuration = (durationStr) => {
@@ -488,22 +477,20 @@
 
     const authenticate = () => {
       voterEmail = voterEmailInput.value.trim();
-      recipientEmail = recipientEmailInput.value.trim();
 
-      if (!voterEmail || !recipientEmail) {
-        showAuthStatus('Please fill in both email fields', 'error');
+      if (!voterEmail) {
+        showAuthStatus('Please fill in your email', 'error');
         return;
       }
 
-      if (!validateEmail(voterEmail) || !validateEmail(recipientEmail)) {
-        showAuthStatus('Please enter valid email addresses', 'error');
+      if (!validateEmail(voterEmail)) {
+        showAuthStatus('Please enter a valid email address', 'error');
         return;
       }
 
       authenticated = true;
       showAuthStatus(`✓ Authenticated as ${voterEmail}`, 'success');
       voterEmailInput.disabled = true;
-      recipientEmailInput.disabled = true;
       render();
     };
 
@@ -694,10 +681,6 @@
     };
 
     voterEmailInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') authenticate();
-    });
-
-    recipientEmailInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') authenticate();
     });
 
