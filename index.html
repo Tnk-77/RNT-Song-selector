@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Contest Song Selection</title>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/index.min.js"></script>
   <style>
     * {
       margin: 0;
@@ -17,6 +18,7 @@
       --color-background-info: #e6f1fb;
       --color-background-success: #eaf3de;
       --color-background-warning: #faeeda;
+      --color-background-danger: #fcebeb;
       --color-text-primary: #1a1a1a;
       --color-text-secondary: #666666;
       --color-text-info: #185fa5;
@@ -27,6 +29,7 @@
       --color-border-secondary: rgba(0, 0, 0, 0.2);
       --color-border-success: #c0dd97;
       --color-border-warning: #fac775;
+      --color-border-danger: #f09595;
       --border-radius-md: 8px;
       --border-radius-lg: 12px;
     }
@@ -38,6 +41,7 @@
         --color-background-info: #0c447c;
         --color-background-success: #27500a;
         --color-background-warning: #633806;
+        --color-background-danger: #501313;
         --color-text-primary: #ffffff;
         --color-text-secondary: #cccccc;
         --color-text-info: #85b7eb;
@@ -48,6 +52,7 @@
         --color-border-secondary: rgba(255, 255, 255, 0.2);
         --color-border-success: #97c459;
         --color-border-warning: #ef9f27;
+        --color-border-danger: #f09595;
       }
     }
 
@@ -76,6 +81,78 @@
       font-weight: 500;
       margin-bottom: 12px;
       color: var(--color-text-primary);
+    }
+
+    .auth-section {
+      background: var(--color-background-primary);
+      border: 0.5px solid var(--color-border-tertiary);
+      border-radius: var(--border-radius-lg);
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .auth-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 600px) {
+      .auth-fields {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-text-primary);
+    }
+
+    .form-group input {
+      padding: 10px 12px;
+      border: 0.5px solid var(--color-border-tertiary);
+      border-radius: var(--border-radius-md);
+      font-size: 13px;
+      background: var(--color-background-primary);
+      color: var(--color-text-primary);
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--color-border-secondary);
+    }
+
+    .form-group input:disabled {
+      background: var(--color-background-secondary);
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .auth-status {
+      padding: 12px;
+      border-radius: var(--border-radius-md);
+      font-size: 13px;
+      border: 0.5px solid;
+    }
+
+    .auth-status.success {
+      background: var(--color-background-success);
+      border-color: var(--color-border-success);
+      color: var(--color-text-success);
+    }
+
+    .auth-status.error {
+      background: var(--color-background-danger);
+      border-color: var(--color-border-danger);
+      color: var(--color-text-danger);
     }
 
     .grid {
@@ -241,7 +318,7 @@
       color: var(--color-text-warning);
     }
 
-    .export-btn {
+    .submit-btn {
       width: 100%;
       padding: 10px;
       border-radius: var(--border-radius-md);
@@ -252,22 +329,22 @@
       transition: all 0.15s;
     }
 
-    .export-btn:disabled {
+    .submit-btn:disabled {
       opacity: 0.5;
       cursor: not-allowed;
     }
 
-    .export-btn.ready {
+    .submit-btn.ready {
       background: var(--color-background-primary);
       border-color: var(--color-border-success);
       color: var(--color-text-success);
     }
 
-    .export-btn.ready:hover {
+    .submit-btn.ready:hover {
       border-color: var(--color-text-success);
     }
 
-    .export-btn:disabled {
+    .submit-btn:disabled {
       background: var(--color-background-secondary);
       border-color: var(--color-border-tertiary);
       color: var(--color-text-secondary);
@@ -280,24 +357,52 @@
       margin-bottom: 16px;
     }
 
-    .icon {
-  font-size: 14px;
-  color: inherit;
-}
+    .message {
+      padding: 12px;
+      border-radius: var(--border-radius-md);
+      font-size: 13px;
+      border: 0.5px solid;
+      margin-bottom: 16px;
+    }
 
-.control-btn .icon {
-  color: var(--color-text-primary);
-}
+    .message.loading {
+      background: var(--color-background-info);
+      border-color: var(--color-border-secondary);
+      color: var(--color-text-info);
+    }
 
-.control-btn.remove .icon {
-  color: var(--color-text-danger);
-}
+    .message.success {
+      background: var(--color-background-success);
+      border-color: var(--color-border-success);
+      color: var(--color-text-success);
+    }
+
+    .message.error {
+      background: var(--color-background-danger);
+      border-color: var(--color-border-danger);
+      color: var(--color-text-danger);
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>Contest song selection</h2>
     
+    <div class="auth-section">
+      <h3>Authentication</h3>
+      <div class="auth-fields">
+        <div class="form-group">
+          <label for="voterEmail">Your email *</label>
+          <input type="email" id="voterEmail" placeholder="your.email@example.com" required>
+        </div>
+        <div class="form-group">
+          <label for="recipientEmail">Recipient email *</label>
+          <input type="email" id="recipientEmail" placeholder="marco@example.com" required>
+        </div>
+      </div>
+      <div id="authStatus"></div>
+    </div>
+
     <div class="grid">
       <div class="column">
         <h3>Available songs (<span id="songCount">31</span>)</h3>
@@ -306,18 +411,21 @@
 
       <div class="column">
         <h3>Your selections (<span id="selectionCount">0</span>/4)</h3>
+        <div id="submitMessage"></div>
         <div class="selections-list" id="selectionsList"></div>
         <div class="duration-indicator invalid" id="durationIndicator">
           Total: 0:00 / min. 15:00
         </div>
-        <button class="export-btn" id="exportBtn" disabled>
-          Select 4 songs with 15+ min duration
+        <button class="submit-btn" id="submitBtn" disabled>
+          Authenticate to submit
         </button>
       </div>
     </div>
   </div>
 
   <script>
+    emailjs.init("rrEeXOIHoTmBKpJIm");
+
     const songs = [
       { id: 1, title: 'SPACE ODDITY', duration: '00:05:00' },
       { id: 2, title: 'HONKY TONK WOMAN', duration: '00:03:00' },
@@ -353,6 +461,13 @@
     ];
 
     let selections = [];
+    let authenticated = false;
+    let voterEmail = '';
+    let recipientEmail = '';
+
+    const voterEmailInput = document.getElementById('voterEmail');
+    const recipientEmailInput = document.getElementById('recipientEmail');
+    const authStatusDiv = document.getElementById('authStatus');
 
     const parseDuration = (durationStr) => {
       const [h, m, s] = durationStr.split(':').map(Number);
@@ -365,7 +480,40 @@
       return `${mins}:${String(secs).padStart(2, '0')}`;
     };
 
+    const validateEmail = (email) => {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    };
+
+
+
+    const authenticate = () => {
+      voterEmail = voterEmailInput.value.trim();
+      recipientEmail = recipientEmailInput.value.trim();
+
+      if (!voterEmail || !recipientEmail) {
+        showAuthStatus('Please fill in both email fields', 'error');
+        return;
+      }
+
+      if (!validateEmail(voterEmail) || !validateEmail(recipientEmail)) {
+        showAuthStatus('Please enter valid email addresses', 'error');
+        return;
+      }
+
+      authenticated = true;
+      showAuthStatus(`✓ Authenticated as ${voterEmail}`, 'success');
+      voterEmailInput.disabled = true;
+      recipientEmailInput.disabled = true;
+      render();
+    };
+
+    const showAuthStatus = (message, type) => {
+      authStatusDiv.className = `auth-status ${type}`;
+      authStatusDiv.textContent = message;
+    };
+
     const addSelection = (songId) => {
+      if (!authenticated) return;
       if (selections.length >= 4) return;
       if (selections.find(s => s.id === songId)) return;
 
@@ -409,41 +557,66 @@
     };
 
     const isComplete = () => {
-      return selections.length === 4 && isValidDuration();
+      return authenticated && selections.length === 4 && isValidDuration();
     };
 
-    const exportText = () => {
+    const generateSelectionsText = () => {
       const points = [4, 3, 2, 1];
-      let text = 'CONTEST SONG SELECTION\n\n';
+      let text = '';
       selections.forEach((s, i) => {
         text += `${i + 1}. ${s.title} (${s.duration}) - ${points[i]} pts\n`;
       });
-      const totalMin = Math.floor(getTotalMinutes());
-      const totalSec = Math.round((getTotalMinutes() % 1) * 60);
-      text += `\nTotal duration: ${totalMin}:${String(totalSec).padStart(2, '0')} (${selections.length} songs)`;
       return text;
     };
 
-    const copyToClipboard = () => {
-      navigator.clipboard.writeText(exportText()).then(() => {
-        const btn = document.getElementById('exportBtn');
-        const originalText = btn.textContent;
-        btn.textContent = 'Copied!';
-        setTimeout(() => {
-          btn.textContent = originalText;
-        }, 2000);
-      });
+    const submitVote = async () => {
+      if (!isComplete()) return;
+
+      const submitBtn = document.getElementById('submitBtn');
+      const messageDiv = document.getElementById('submitMessage');
+      
+      submitBtn.disabled = true;
+      messageDiv.className = 'message loading';
+      messageDiv.textContent = 'Sending submission...';
+
+      try {
+        const totalMin = Math.floor(getTotalMinutes());
+        const totalSec = Math.round((getTotalMinutes() % 1) * 60);
+        const totalDuration = `${totalMin}:${String(totalSec).padStart(2, '0')}`;
+
+        const templateParams = {
+          user_email: recipientEmail,
+          voter_email: voterEmail,
+          selections: generateSelectionsText(),
+          total_duration: totalDuration
+        };
+
+        await emailjs.send('service_rnt2026', 'template_6tlwnq9', templateParams);
+
+        messageDiv.className = 'message success';
+        messageDiv.textContent = '✓ Submission sent successfully!';
+        
+        voterEmailInput.value = '';
+        recipientEmailInput.value = '';
+        authenticated = false;
+        selections = [];
+        render();
+
+      } catch (error) {
+        messageDiv.className = 'message error';
+        messageDiv.textContent = `Error sending submission: ${error.message}`;
+        submitBtn.disabled = false;
+      }
     };
 
     const render = () => {
-      // Render song list
       const songList = document.getElementById('songList');
       songList.innerHTML = '';
       songs.forEach(song => {
         const isSelected = selections.find(s => s.id === song.id);
         const btn = document.createElement('button');
         btn.className = `song-item ${isSelected ? 'selected' : ''}`;
-        btn.disabled = selections.length >= 4 && !isSelected;
+        btn.disabled = !authenticated || (selections.length >= 4 && !isSelected);
         btn.innerHTML = `
           <span class="song-title">${song.title}</span>
           <span class="song-duration">${song.duration}</span>
@@ -452,7 +625,6 @@
         songList.appendChild(btn);
       });
 
-      // Render selections
       const selectionsList = document.getElementById('selectionsList');
       selectionsList.innerHTML = '';
       selections.forEach((song, idx) => {
@@ -466,7 +638,7 @@
             <div class="selection-meta">${song.duration} • ${points[idx]} pts</div>
           </div>
           <div class="selection-controls">
-           <button class="control-btn" ${idx === 0 ? 'disabled' : ''}>
+            <button class="control-btn" ${idx === 0 ? 'disabled' : ''}>
               ↑
             </button>
             <button class="control-btn" ${idx === selections.length - 1 ? 'disabled' : ''}>
@@ -489,10 +661,8 @@
         selectionsList.appendChild(div);
       });
 
-      // Update counters
       document.getElementById('selectionCount').textContent = selections.length;
 
-      // Update duration indicator
       const totalMin = getTotalMinutes();
       const totalSec = Math.round((totalMin % 1) * 60);
       const indicator = document.getElementById('durationIndicator');
@@ -506,19 +676,50 @@
         indicator.textContent = durationText;
       }
 
-      // Update export button
-      const exportBtn = document.getElementById('exportBtn');
+      const submitBtn = document.getElementById('submitBtn');
       if (isComplete()) {
-        exportBtn.className = 'export-btn ready';
-        exportBtn.disabled = false;
-        exportBtn.textContent = 'Copy result to clipboard';
-        exportBtn.onclick = copyToClipboard;
+        submitBtn.className = 'submit-btn ready';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit selections';
+        submitBtn.onclick = submitVote;
+      } else if (!authenticated) {
+        submitBtn.className = 'submit-btn';
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Authenticate to submit';
       } else {
-        exportBtn.className = 'export-btn';
-        exportBtn.disabled = true;
-        exportBtn.textContent = 'Select 4 songs with 15+ min duration';
+        submitBtn.className = 'submit-btn';
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Select 4 songs with 15+ min duration';
       }
     };
+
+    voterEmailInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') authenticate();
+    });
+
+    recipientEmailInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') authenticate();
+    });
+
+    const authBtn = document.createElement('button');
+    authBtn.textContent = 'Authenticate';
+    authBtn.style.cssText = `
+      padding: 10px 16px;
+      background: var(--color-background-info);
+      border: 0.5px solid var(--color-border-secondary);
+      border-radius: var(--border-radius-md);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-text-info);
+      cursor: pointer;
+      transition: all 0.15s;
+    `;
+    authBtn.onmouseover = () => authBtn.style.borderColor = 'var(--color-text-info)';
+    authBtn.onmouseout = () => authBtn.style.borderColor = 'var(--color-border-secondary)';
+    authBtn.onclick = authenticate;
+    
+    const authFieldsDiv = document.querySelector('.auth-fields');
+    authFieldsDiv.parentNode.insertBefore(authBtn, authStatusDiv);
 
     render();
   </script>
