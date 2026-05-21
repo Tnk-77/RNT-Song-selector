@@ -710,9 +710,16 @@
     render();
   </script>
 
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/index.min.js"></script>
   <script>
-    emailjs.init("rrEeXOIHoTmBKpJIm");
+    function initEmailJS() {
+      if (typeof emailjs !== 'undefined') {
+        emailjs.init("rrEeXOIHoTmBKpJIm");
+        console.log("EmailJS initialized");
+      } else {
+        setTimeout(initEmailJS, 100);
+      }
+    }
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/index.min.js" onload="initEmailJS()"></script>
 </body>
 </html>
