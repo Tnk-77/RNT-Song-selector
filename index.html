@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Contest Song Selection</title>
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/index.min.js" defer></script>
   <style>
     * {
       margin: 0;
@@ -414,8 +413,6 @@
   </div>
 
   <script>
-    emailjs.init("rrEeXOIHoTmBKpJIm");
-
     const songs = [
       { id: 1, title: 'SPACE ODDITY', duration: '00:05:00' },
       { id: 2, title: 'HONKY TONK WOMAN', duration: '00:03:00' },
@@ -705,6 +702,11 @@
     authFieldsDiv.parentNode.insertBefore(authBtn, authStatusDiv);
 
     render();
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/index.min.js"></script>
+  <script>
+    emailjs.init("rrEeXOIHoTmBKpJIm");
   </script>
 </body>
 </html>
