@@ -559,6 +559,12 @@
       const submitBtn = document.getElementById('submitBtn');
       const messageDiv = document.getElementById('submitMessage');
       
+      if (typeof emailjs === 'undefined') {
+        messageDiv.className = 'message error';
+        messageDiv.textContent = 'Email service loading... Please wait a moment and try again.';
+        return;
+      }
+
       submitBtn.disabled = true;
       messageDiv.className = 'message loading';
       messageDiv.textContent = 'Sending submission...';
