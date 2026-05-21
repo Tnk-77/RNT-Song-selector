@@ -148,6 +148,22 @@
       color: var(--color-text-danger);
     }
 
+    .auth-btn {
+      padding: 10px 16px;
+      background: var(--color-background-info);
+      border: 0.5px solid var(--color-border-secondary);
+      border-radius: var(--border-radius-md);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-text-info);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .auth-btn:hover {
+      border-color: var(--color-text-info);
+    }
+
     .grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -389,7 +405,8 @@
           <input type="email" id="voterEmail" placeholder="your.email@example.com" required>
         </div>
       </div>
-      <div id="authStatus"></div>
+      <button class="auth-btn" id="authBtn">Authenticate</button>
+      <div id="authStatus" style="margin-top: 12px;"></div>
     </div>
 
     <div class="grid">
@@ -413,6 +430,8 @@
   </div>
 
   <script>
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwSQb_ZJwdX5z7n67mhwkS0XGqjZMJb2Zp-g4BiS3xnZvXLFNMhzz5gMxn_tMcjszsdEg/exec';
+
     const songs = [
       { id: 1, title: 'SPACE ODDITY', duration: '00:05:00' },
       { id: 2, title: 'HONKY TONK WOMAN', duration: '00:03:00' },
@@ -450,27 +469,19 @@
     let selections = [];
     let authenticated = false;
     let voterEmail = '';
-    let recipientEmail = 'rnt.band.2020@gmail.com';
 
     const voterEmailInput = document.getElementById('voterEmail');
     const authStatusDiv = document.getElementById('authStatus');
+    const authBtn = document.getElementById('authBtn');
 
     const parseDuration = (durationStr) => {
       const [h, m, s] = durationStr.split(':').map(Number);
       return h * 3600 + m * 60 + s;
     };
 
-    const formatDuration = (seconds) => {
-      const mins = Math.floor(seconds / 60);
-      const secs = seconds % 60;
-      return `${mins}:${String(secs).padStart(2, '0')}`;
-    };
-
     const validateEmail = (email) => {
       return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     };
-
-
 
     const authenticate = () => {
       voterEmail = voterEmailInput.value.trim();
@@ -488,6 +499,7 @@
       authenticated = true;
       showAuthStatus(`✓ Authenticated as ${voterEmail}`, 'success');
       voterEmailInput.disabled = true;
+      authBtn.disabled = true;
       render();
     };
 
@@ -559,42 +571,43 @@
       const submitBtn = document.getElementById('submitBtn');
       const messageDiv = document.getElementById('submitMessage');
       
-      if (typeof emailjs === 'undefined') {
-        messageDiv.className = 'message error';
-        messageDiv.textContent = 'Email service loading... Please wait a moment and try again.';
-        return;
-      }
-
       submitBtn.disabled = true;
       messageDiv.className = 'message loading';
-      messageDiv.textContent = 'Sending submission...';
+      messageDiv.textContent = 'Submitting...';
 
       try {
         const totalMin = Math.floor(getTotalMinutes());
         const totalSec = Math.round((getTotalMinutes() % 1) * 60);
         const totalDuration = `${totalMin}:${String(totalSec).padStart(2, '0')}`;
 
-        const templateParams = {
-          user_email: recipientEmail,
+        const payload = {
           voter_email: voterEmail,
           selections: generateSelectionsText(),
           total_duration: totalDuration
         };
 
-        await emailjs.send('service_rnt2026', 'template_6tlwnq9', templateParams);
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
 
         messageDiv.className = 'message success';
-        messageDiv.textContent = '✓ Submission sent successfully!';
+        messageDiv.textContent = '✓ Submission recorded successfully!';
         
         voterEmailInput.value = '';
-        recipientEmailInput.value = '';
         authenticated = false;
         selections = [];
+        voterEmailInput.disabled = false;
+        authBtn.disabled = false;
         render();
 
       } catch (error) {
         messageDiv.className = 'message error';
-        messageDiv.textContent = `Error sending submission: ${error.message}`;
+        messageDiv.textContent = `Error submitting: ${error.message}`;
         submitBtn.disabled = false;
       }
     };
@@ -687,39 +700,9 @@
       if (e.key === 'Enter') authenticate();
     });
 
-    const authBtn = document.createElement('button');
-    authBtn.textContent = 'Authenticate';
-    authBtn.style.cssText = `
-      padding: 10px 16px;
-      background: var(--color-background-info);
-      border: 0.5px solid var(--color-border-secondary);
-      border-radius: var(--border-radius-md);
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--color-text-info);
-      cursor: pointer;
-      transition: all 0.15s;
-    `;
-    authBtn.onmouseover = () => authBtn.style.borderColor = 'var(--color-text-info)';
-    authBtn.onmouseout = () => authBtn.style.borderColor = 'var(--color-border-secondary)';
     authBtn.onclick = authenticate;
-    
-    const authFieldsDiv = document.querySelector('.auth-fields');
-    authFieldsDiv.parentNode.insertBefore(authBtn, authStatusDiv);
 
     render();
   </script>
-
-  <script>
-    function initEmailJS() {
-      if (typeof emailjs !== 'undefined') {
-        emailjs.init("rrEeXOIHoTmBKpJIm");
-        console.log("EmailJS initialized");
-      } else {
-        setTimeout(initEmailJS, 100);
-      }
-    }
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/index.min.js" onload="initEmailJS()"></script>
 </body>
 </html>
