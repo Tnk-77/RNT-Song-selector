@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Contest Song Selection</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons@latest/tabler-icons.min.css">
   <style>
     * {
       margin: 0;
@@ -465,14 +464,14 @@
             <div class="selection-meta">${song.duration} • ${points[idx]} pts</div>
           </div>
           <div class="selection-controls">
-            <button class="control-btn" ${idx === 0 ? 'disabled' : ''}>
-              <i class="icon ti ti-arrow-up"></i>
+           <button class="control-btn" ${idx === 0 ? 'disabled' : ''}>
+              ↑
             </button>
             <button class="control-btn" ${idx === selections.length - 1 ? 'disabled' : ''}>
-              <i class="icon ti ti-arrow-down"></i>
+              ↓
             </button>
             <button class="control-btn remove">
-              <i class="icon ti ti-x"></i>
+              ✕
             </button>
           </div>
         `;
